@@ -7,6 +7,12 @@ authors = ["nwin <nwin@users.noreply.github.com>"]
 readme = "README.md"
 repository = "https://github.com/nwin/lzw.git"
 
+exclude = ["/sgx/*"]
+
 [features]
-default = ["raii_no_panic"]
+default = ["raii_no_panic", "mesalock_sgx"]
 raii_no_panic = []
+mesalock_sgx = ["sgx_tstd"]
+
+[dependencies]
+sgx_tstd = { rev = "v1.0.9", git = "https://github.com/baidu/rust-sgx-sdk.git", optional = true }

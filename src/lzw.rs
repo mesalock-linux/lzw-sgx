@@ -4,8 +4,9 @@
 // See http://www.cplusplus.com/articles/iL18T05o/ for his extensive explanations
 // and a C++ implementatation
 
+use std::prelude::v1::*;
 use std::io;
-use std::io::{Read, Write};
+use std::io::Read;
 
 use bitstream::{Bits, BitReader, BitWriter};
 

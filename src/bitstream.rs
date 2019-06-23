@@ -1,5 +1,6 @@
 //! This module provides bit readers and writers
 
+use std::prelude::v1::*;
 use std::io::{self, Write};
 
 /// Containes either the consumed bytes and reconstructed bits or
