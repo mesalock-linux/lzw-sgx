@@ -1,5 +1,6 @@
 //! This module provides bit readers and writers
 
+use std::prelude::v1::*;
 use std::io::{self, Write};
 
 /// Containes either the consumed bytes and reconstructed bits or
@@ -182,7 +183,7 @@ impl<W: Write> BitWriter for LsbWriter<W> {
         self.acc |= (v as u32) << self.bits;
         self.bits += n;
         while self.bits >= 8 {
-            try!(self.w.write_all(&[self.acc as u8]));
+            self.w.write_all(&[self.acc as u8])?;
             self.acc >>= 8;
             self.bits -= 8
 
@@ -198,7 +199,7 @@ impl<W: Write> BitWriter for MsbWriter<W> {
         self.acc |= (v as u32) << (32 - n - self.bits);
         self.bits += n;
         while self.bits >= 8 {
-            try!(self.w.write_all(&[(self.acc >> 24) as u8]));
+            self.w.write_all(&[(self.acc >> 24) as u8])?;
             self.acc <<= 8;
             self.bits -= 8
 

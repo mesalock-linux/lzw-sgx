@@ -4,8 +4,9 @@
 // See http://www.cplusplus.com/articles/iL18T05o/ for his extensive explanations
 // and a C++ implementatation
 
+use std::prelude::v1::*;
 use std::io;
-use std::io::{Read, Write};
+use std::io::Read;
 
 use bitstream::{Bits, BitReader, BitWriter};
 
@@ -327,14 +328,14 @@ where R: Read, W: BitWriter {
     let mut code_size = min_code_size + 1;
     let mut i = None;
     // gif spec: first clear code
-    try!(w.write_bits(dict.clear_code(), code_size));
+    w.write_bits(dict.clear_code(), code_size)?;
     let mut r = r.bytes();
     while let Some(Ok(c)) = r.next() {
         let prev = i;
         i = dict.search_and_insert(prev, c);
         if i.is_none() {
             if let Some(code) = prev {
-                try!(w.write_bits(code, code_size));
+                w.write_bits(code, code_size)?;
             }
             i = Some(dict.search_initials(c as Code))
         }
@@ -348,16 +349,16 @@ where R: Read, W: BitWriter {
             dict.reset();
             dict.push_node(Node::new(0)); // clear code
             dict.push_node(Node::new(0)); // end code
-            try!(w.write_bits(dict.clear_code(), code_size));
+            w.write_bits(dict.clear_code(), code_size)?;
             code_size = min_code_size + 1;
         }
 
     }
     if let Some(code) = i {
-        try!(w.write_bits(code, code_size));
+        w.write_bits(code, code_size)?;
     }
-    try!(w.write_bits(dict.end_code(), code_size));
-    try!(w.flush());
+    w.write_bits(dict.end_code(), code_size)?;
+    w.flush()?;
     Ok(())
 }
 
@@ -380,7 +381,7 @@ impl<W: BitWriter> Encoder<W> {
         dict.push_node(Node::new(0)); // clear code
         dict.push_node(Node::new(0)); // end code
         let code_size = min_code_size + 1;
-        try!(w.write_bits(dict.clear_code(), code_size));
+        w.write_bits(dict.clear_code(), code_size)?;
         Ok(Encoder {
             w: w,
             dict: dict,
@@ -406,7 +407,7 @@ impl<W: BitWriter> Encoder<W> {
             *i = dict.search_and_insert(prev, c);
             if i.is_none() {
                 if let Some(code) = prev {
-                    try!(w.write_bits(code, *code_size));
+                    w.write_bits(code, *code_size)?;
                 }
                 *i = Some(dict.search_initials(c as Code))
             }
@@ -420,7 +421,7 @@ impl<W: BitWriter> Encoder<W> {
                 dict.reset();
                 dict.push_node(Node::new(0)); // clear code
                 dict.push_node(Node::new(0)); // end code
-                try!(w.write_bits(dict.clear_code(), *code_size));
+                w.write_bits(dict.clear_code(), *code_size)?;
                 *code_size = self.min_code_size + 1;
             }
 
@@ -447,9 +448,9 @@ impl<W: BitWriter> Drop for Encoder<W> {
             let w = &mut self.w;
             let code_size = &mut self.code_size;
             if let Some(code) = self.i {
-                try!(w.write_bits(code, *code_size));
+                w.write_bits(code, *code_size)?;
             }
-            try!(w.write_bits(self.dict.end_code(), *code_size));
+            w.write_bits(self.dict.end_code(), *code_size)?;
             w.flush()
          })().unwrap()
         
